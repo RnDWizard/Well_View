@@ -1,0 +1,113 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import lasio
+
+las = lasio.read(r'C:\Users\david\PycharmProjects\wellview\Data\demo_data.las')
+df = las.df()
+df['DEPTH'] = df.index
+df.tail()
+
+df_horizon = pd.read_csv(r'C:\Users\david\PycharmProjects\wellview\Data\HZNS3.csv',converters={'Dep': int})
+
+#Layout Settings Settings
+font = 10
+
+# Las Data
+GR = df[('GR')]
+DENS = df[('DENS')]
+DTC = df[('DTC')]
+NEUT = df[('NEUT')]
+CAL = df[('CALI')]
+y = df[('DEPTH')]
+
+#HZN Data
+hzny = df_horizon[('Dep')]
+hzn_nam = df_horizon[('HZN')]
+arbxgam = (0,150,1000)
+
+fig, ax = plt.subplots(nrows=1, ncols=6,figsize=(6,40),sharey=True)
+
+ax[0].set_ylabel('Depth (m)')
+
+#CALIPER
+ax[0].plot(CAL,y,color='black',linewidth=0.5)
+ax[0].set_title('CAL',fontsize= font)
+ax[0].invert_yaxis()
+ax[0].set_ylim([1500,0])
+for index,row in df_horizon.iterrows():
+    val = int(index)
+    ax[0].axhline(df_horizon.at[val,'Dep'],color=df_horizon.at[val,'color'],label=df_horizon.at[val,'HZN'])
+ax[0].legend()
+ax[0].set_xlim([0,30])
+
+#Gamma Plot
+ax[1].plot(GR,y,color='green')
+ax[1].set_title('GR ',fontsize= font)
+ax[1].invert_yaxis()
+ax[1].fill_betweenx(df['DEPTH'], df['GR'], 0, facecolor='green',linewidth=0.5)
+ax[1].fill_betweenx(df['DEPTH'], df['GR'], 150, facecolor='yellow',linewidth=0.5)
+ax[1].set_xlim([0,150])
+ax[1].set_ylim([1500,0])
+ax[1].set_xlabel('API')
+ax[1].xaxis.set_minor_locator(plt.MultipleLocator(20))
+for index,row in df_horizon.iterrows():
+    val = int(index)
+    ax[1].axhline(df_horizon.at[val,'Dep'],color=df_horizon.at[val,'color'],label=df_horizon.at[val,'HZN'])
+ax[1].grid(linewidth=0.4,dashes=(5,2,1))
+
+#Dens Plot
+ax[2].plot(DENS,y,color='black',linewidth=0.5)
+ax[2].set_title('DENS',fontsize= font)
+ax[2].set_xlabel('g/cc')
+ax[2].invert_yaxis()
+ax[2].set_ylim([1500,0])
+ax[2].set_xlim([2,3])
+ax[2].xaxis.set_minor_locator(plt.MultipleLocator(0.25))
+for index,row in df_horizon.iterrows():
+    val = int(index)
+    ax[2].axhline(df_horizon.at[val,'Dep'],color=df_horizon.at[val,'color'])
+ax[2].grid(linewidth=0.4,dashes=(5,2,1))
+
+
+#DTC Plot
+ax[3].plot(DTC,y,color='black',linewidth=0.5)
+ax[3].set_xlim([240,40])
+ax[3].set_title('DTC',fontsize= font)
+ax[3].set_xlabel('us/ft')
+ax[3].invert_yaxis()
+ax[3].set_ylim([1500,0])
+ax[3].xaxis.set_minor_locator(plt.MultipleLocator(20))
+for index,row in df_horizon.iterrows():
+    val = int(index)
+    ax[3].axhline(df_horizon.at[val,'Dep'],color=df_horizon.at[val,'color'])
+ax[3].grid(linewidth=0.4,dashes=(5,2,1))
+
+
+# Neutron Plot
+ax[4].plot(NEUT,y,color='black',linewidth=0.5)
+ax[4].set_title('Por',fontsize= font)
+ax[4].invert_yaxis()
+ax[4].set_xlabel('v/v')
+ax[4].set_ylim([1500,0])
+ax[4].set_xlim([0,0.4])
+ax[4].xaxis.set_minor_locator(plt.MultipleLocator(0.5))
+for index,row in df_horizon.iterrows():
+    val = int(index)
+    ax[4].axhline(df_horizon.at[val,'Dep'],color=df_horizon.at[val,'color'])
+ax[4].grid(linewidth=0.4,dashes=(5,2,1))
+
+
+# ACOUSTIC IMP
+AI = (DENS * ((1/DTC)*304800))
+ax[5].plot(AI,y,color='black',linewidth=0.5)
+ax[5].set_title('AI',fontsize= font)
+ax[5].invert_yaxis()
+ax[5].set_xlabel('g/cc*m/s')
+ax[5].set_ylim([1500,0])
+# ax[5].set_xlim([0,0.4])
+ax[5].xaxis.set_minor_locator(plt.MultipleLocator(1000))
+for index,row in df_horizon.iterrows():
+    val = int(index)
+    ax[5].axhline(df_horizon.at[val,'Dep'],color=df_horizon.at[val,'color'])
+ax[5].grid(linewidth=0.4,dashes=(5,2,1))
